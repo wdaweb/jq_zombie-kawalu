@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+
+    <style>
+        body {
+            /* height: 100vh; */
+            background: url(./backgroundCity2.jpg);
+            background-size: cover;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            cursor: url(./NL_.png) 25 25, auto;
+            /* cursor: none; */
+            transition: 1s;
+            color: #fff;
+        }
+
+        .box {
+            position: fixed;
+            color: white;
+            left: 50px;
+            bottom: 50px;
+            /* background-color: #fff; */
+            text-align: center;
+            font-weight: bolder;
+        }
+
+        #game {
+            /* position: absolute; */
+            width: 100vw;
+            height: 100vh;
+            /* background-color: #fff; */
+            margin: auto;
+
+        }
+
+        #game img {
+            height: 150px;
+            position: absolute;
+            user-select: none;
+            -webkit-user-drag: none;
+            transform: rotate(0deg);
+        }
+
+        .nlCry {
+            pointer-events: none;
+        }
+
+        h3 {
+            color: #fff;
+            margin: 15px;
+        }
+
+        .mouseText {
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        input {
+            vertical-align: middle;
+        }
+
+        .container {
+            width: 80%;
+            margin: auto;
+            display: flex;
+        }
+
+        .container img {
+            width: 100px;
+            height: auto;
+        }
+
+        .slick-prev,
+        .slick-next {
+            display: none;
+        }
+
+        .bullet {
+            width: 300px;
+            height: 300px;
+            position: absolute;
+            user-select: none;
+            -webkit-user-drag: none;
+            transform: translate(-100%);
+            background-image: url(./彈孔.png);
+            background-repeat: no-repeat;
+            background-position: center center;
+            background: cover;
+            transform: translate(-50%, -25%);
+            z-index: -5;
+        }
+
+        .pit {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: -6;
+        }
+
+        .curPit {
+            width: 250px;
+            height: 250px;
+            position: absolute;
+            top: 105px;
+            right: -50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            
+
+        }
+
+        .curPit img {
+            width: 150px;
+            height: 150px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            filter: brightness(50%);
+        }
+
+        .curPit img:hover {
+            filter: brightness(100%);
+        }
+
+        .mouseSymbol {
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            pointer-events: none;
+            z-index: 100;
+            background-image: url(./NL_.png);
+            background-repeat: no-repeat;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- <div class="mouseSymbol"></div> -->
+    <h3 class="mouseText">0</h3>
+    <div class="box">
+        <input type="button" value="開始" id="btn-start">
+        <input type="button" value="結束" id="btn-stop">
+        <p>分數: <span id="text-score">0</span></p>
+        <p>剩餘: <span id="text-time">0</span>秒</p>
+        <p>最高分玩家: <span id="text-highscorename">沒有人</span></p>
+        <p>最高分分數: <span id="text-highscore">0</span></p>
+    </div>
+    <span>音量調整</span><input type="range" name="" id="volume" step="0.01" min="0" max="1" value="1">
+    <div class="pit">
+        <img src="./nl封面.gif" alt="">
+    </div>
+
+    <div class="curPit">
+        <div class="cur1">
+            <img src="./NL肥臉.png" alt="">
+        </div>
+        <div class="cur2">
+            <img src="./birdCur.png" alt="">
+        </div>
+    </div>
+    <div id="game">
+
+    </div>
+
+
+    <script src="/jquery-3.6.4.min.js"></script>
+
+    <script>
+        let score = 0
+        let countdown = 0
+        let timer = 0
+        let moveOn = false
+        let backgroundMusic = new Audio('./NL熊蚊銨ASMR.mp3')
+        let timeRunOut = new Audio('./時間快到囉.mp3')
+
+
+        function musicRunOut() {
+            timeRunOut.loop = true
+            timeRunOut.play()
+        }
+
+        function stopmusicRunOut() {
+            timeRunOut.pause()
+            timeRunOut.currentTime = 0
+        }
+        function playMusic() {
+            backgroundMusic.loop = true
+            backgroundMusic.play()
+        }
+
+        function stopMusic() {
+            backgroundMusic.pause()
+            backgroundMusic.currentTime = 0
+        }
+
+        $('#volume').on('mousemove', function () {
+            let volume = $(this).val()
+            backgroundMusic.volume = volume
+
+        })
+        backgroundMusic.volume = 1
+
+
+
+
+
+        $('#btn-stop').attr('disabled', true)
+        $('#btn-start').click(function () {
+            setTimeout(function () {
+                $('.pit').fadeOut('slow', function () {
+
+                })
+            }, 500)
+
+            $('#btn-stop').attr('disabled', false)
+            const _this = this
+            function getRandomBackground() {
+                const imags = ['./backgroundKAWA.jpg', './backgroundCity.jpg', './backgroundCity2.jpg']
+                return imags[Math.floor(Math.random() * imags.length)]
+            }
+
+            changeImges = setInterval(function () {
+                const randomBg = getRandomBackground()
+
+                $('body').css({
+                    'background': `url(${randomBg})`,
+                    'background-size': 'cover',
+                })
+
+            }, 5000)
+
+            function audioOn() {
+                audio = new Audio('./gun.mp3')
+                audio.play()
+            }
+
+            $('#game').on('click', audioOn)
+
+
+            $(this).attr('disabled', true)
+            score = 0
+            $('#text-score').text(score)
+            countdown = 180
+            $('#text-time').text(countdown)
+
+            playMusic()
+
+            timer = setInterval(function () {
+                countdown--
+                $('#text-time').text(countdown)
+                const random = Math.ceil(Math.random() * 20)
+                if (random < 20 && $('.nl').length < 20 && $('.nljump').length < 5) {
+                    const top = Math.round(Math.random() * 100) + '%'
+                    const left = Math.round(Math.random() * 100) + '%'
+                    const rotate = Math.round(Math.random() * 360) + 'deg'
+                    const nl = $(`<img src="./svL7cKQ.gif" class="nl" style="top: ${top}; left: ${left}; transform: rotate(${rotate}deg);">`)
+                    const nljump = $(`<img src="./nl跳繩.gif" class="nljump" style="top: ${top}; left: ${left}; transform: rotate(${rotate}deg);">`)
+                    $('#game').append(nl)
+                        .append(nljump)
+                    move(nl)
+                    move(nljump)
+                }
+
+                if (countdown === 30) {
+                    musicRunOut()
+                }
+
+                if (countdown === 0) {
+                    clearInterval(changeImges)
+                    clearInterval(timer)
+                    $('#game').html('')
+                    $(_this).attr('disabled', false)
+                    $('#game').off('click', audioOn)
+                    stopMusic()
+                    stopmusicRunOut()
+                    $('.pit').fadeIn('slow', function () {
+
+                    })
+                }
+
+
+
+
+            }, 1000)
+
+            $('#btn-stop').on('click', function () {
+                clearInterval(changeImges)
+                clearInterval(timer)
+                $('#game').html('')
+                $('#game').off('click', audioOn)
+                $(_this).attr('disabled', false)
+                $('#btn-stop').attr('disabled', true)
+                countdown = 180
+                $('#text-time').text(countdown)
+                stopMusic()
+                stopmusicRunOut()
+                $('.pit').fadeIn('slow', function () {
+
+                })
+            })
+
+        })
+
+        $('#game').click(function (evt) {
+            const bullet = $(`<div class="bullet"></div>`)
+            bullet.css({
+                'left': evt.pageX - $(this).offset().left + 'px',
+                'top': evt.pageY - $(this).offset().top + 'px',
+            })
+            $(this).append(bullet)
+
+            $('.bullet').fadeOut(2000).delay(5000).queue(function () {
+                $(this).remove()
+            })
+
+        })
+
+        function move(nl) {
+            const top = Math.round(Math.random() * 100) + '%'
+            const left = Math.round(Math.random() * 100) + '%'
+            const rotate = Math.round(Math.random() * 360) + 'deg'
+            nl.animate({ top, left, rotate }, 2000, function () {
+                move(nl)
+            })
+        }
+
+
+        $('#game').on('click', '.nl', function () {
+            $(this).attr('src', './nl.png')
+            $(this).removeClass('nl').addClass('nlCry')
+            $(this).stop()
+            $(this).fadeOut(2000).delay(3000).queue(function () {
+                $(this).remove()
+            })
+            // setTimeout(function () {
+            //     $(this).fadeOut(2000)
+            // }.bind(this), 1000)
+
+            score++
+            $('#text-score').text(score)
+
+        })
+
+        $('#game').on('click', '.nljump', function () {
+            $(this).attr('src', './bird.png')
+            $(this).removeClass('nl').addClass('nlCry')
+            $(this).stop()
+            $(this).fadeOut(2000).delay(3000).queue(function () {
+                $(this).remove()
+            })
+            // setTimeout(function () {
+            //     $(this).fadeOut(2000)
+            // }.bind(this), 1000)
+
+            score += 10
+            $('#text-score').text(score)
+
+        })
+
+
+        $('.cur1').on('click', function () {
+            $('body').css('cursor', 'url(./NL_.png) 25 25, auto')
+        })
+        $('.cur2').on('click', function () {
+            $('body').css('cursor', 'url(./birdCur.png) 25 25, auto')
+        })
+
+
+
+        $(window).mousemove(function (evt) {
+            $('.mouseText').text(`座標X(${evt.pageX}),座標Y(${evt.pageY})`)
+            // $('.mouseSymbol').css("left", evt.pageX - $(document).scrollLeft() + "px")
+            //     .css("top", evt.pageY - $(document).scrollTop() + "px")
+
+        })
+
+
+
+
+    </script>
+</body>
+
+</html>
